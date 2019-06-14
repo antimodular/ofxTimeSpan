@@ -1,0 +1,4 @@
+ofxCurvesTool
+ofxGui
+ofxTimeSpan
+ofxTiming
