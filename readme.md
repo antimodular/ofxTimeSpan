@@ -9,7 +9,9 @@ ofxTimeSpan provides functions to help schedule and trigger actions.
 ![Demo](ofxTimeSpan.gif)
 
 ### DEPENDENCIES: 
-[ofxCurvesTool](https://github.com/antimodular/ofxCurvesTool)
-[ofxTiming](https://github.com/kylemcdonald/ofxTiming)
-ofxGui
+* [ofxCurvesTool](https://github.com/antimodular/ofxCurvesTool)
+* [ofxTiming](https://github.com/kylemcdonald/ofxTiming)
+* ofxGui
 
+### Platforms
+It was only tested on macOS 10.12.6 but should work on others too.
