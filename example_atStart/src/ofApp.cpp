@@ -10,13 +10,14 @@ void ofApp::setup(){
     spanNames.push_back("thingOne");
     spanNames.push_back("thingTwo");
     spanNames.push_back("thingThree");
-    timepan_object.setup("my_timeline",spanNames);
+    timepan_object.setup("timepan_object",spanNames);
     
     timepan_object.gui_spans.setPosition(10, 120);
 
     timepan_object.init();
 
-    
+    myRect = ofRectangle(0,0,100,100);
+    myColor = ofColor(168,196,113);
 }
 
 //--------------------------------------------------------------
@@ -38,12 +39,31 @@ void ofApp::draw(){
     ofDrawBitmapStringHighlight("activeValueX: "+ofToString(timepan_object.activeValueX), 10,temp_y+=15);
      ofDrawBitmapStringHighlight("activeValueY: "+ofToString(timepan_object.activeValueY), 10,temp_y+=15);
     ofDrawBitmapStringHighlight("readyForNewTrigger: "+ofToString(timepan_object.readyForNewTrigger), 10,temp_y+=15);
-
     
-//    if(timepan_object.readyForNewTrigger == true){
-//        ofLog()<<"timepan_object.readyForNewTrigger "<<timepan_object.readyForNewTrigger;
-//        timepan_object.readyForNewTrigger = false;
-//    }
+    if(timepan_object.bRunning == true){
+        if(timepan_object.justBegan == true){
+            timepan_object.justBegan = false;
+            myRect = ofRectangle(0,0,100,200);
+        }
+        if(timepan_object.activeIndex == 0){
+            if(timepan_object.currentSpan->justBegan == true){
+                timepan_object.currentSpan->justBegan = false;
+                myColor = ofColor(130,178,59);
+            }
+        }else if(timepan_object.activeIndex == 1){
+            
+            if(timepan_object.currentSpan->justBegan == true){
+                timepan_object.currentSpan->justBegan = false;
+                myColor = ofColor(45,102,86);
+            }
+        }else if(timepan_object.activeIndex == 2){
+            
+            if(timepan_object.currentSpan->justBegan == true){
+                timepan_object.currentSpan->justBegan = false;
+                myColor = ofColor(21,45,88);
+            }
+        }
+    }
     
     ofPushMatrix();
     float temp_X = ofMap(timepan_object.activeValueX, 0, 1, 0, 256*3);
@@ -53,8 +73,8 @@ void ofApp::draw(){
     ofRotateZDeg(temp_deg);
     ofTranslate(-50, -100);
     ofFill();
-    ofSetColor(255, 0, 0);
-    ofDrawRectangle(0, 0, 100, 200);
+    ofSetColor(myColor);
+    ofDrawRectangle(myRect);
     ofPopMatrix();
     
       timepan_object.draw();
@@ -64,7 +84,7 @@ void ofApp::draw(){
 void ofApp::keyPressed(int key){
 
     if(key == 's')    timepan_object.save();
-     if(key == 't')    timepan_object.bTrigger = true;
+     if(key == 't')    timepan_object.triggerIt();
 }
 
 //--------------------------------------------------------------

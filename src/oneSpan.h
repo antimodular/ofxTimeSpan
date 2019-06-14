@@ -18,7 +18,8 @@ class oneSpan {
     
 public:
     int myID;
-    string myName;
+    string timelineName;
+    string spanLabel;
     
     ofParameterGroup parameter_span;
     //    ofParameter<bool> bUse;
@@ -56,23 +57,27 @@ public:
     
     ofxCurvesTool curvesTool;
     
-    void setup(int _id, string _name){
+    bool justBegan;
+    bool justEnded;
+    
+    void setup(int _id, string _timelineName, string _spanLabel){
         myID = _id;
-        myName = _name;
+        timelineName = _timelineName;
+        spanLabel = _spanLabel;
         
         curveTypeNames[0] = "curveTool";
         curveTypeNames[1] = "exponential";
         
-        parameter_span.setName("span_"+ofToString(myID));
+        parameter_span.setName("span_"+ofToString(myID)+"_"+spanLabel);
         parameter_span.add(bActive.set("bActive", false));
         parameter_span.add(curveTypeIndex.set("curveType", 0,0,1));
-         parameter_span.add(curveTypeName.set("typeName",""));
+        parameter_span.add(curveTypeName.set("typeName",""));
         parameter_span.add(expo_value.set("expo_value", 1,0,5));
         
         parameter_span.add(bResetCurve.set("resetCurve", false));
         parameter_span.add(duration.set("duration",10,0,300));
         parameter_span.add(endPause.set("endPause",10,0,300));
- 
+        
         amount = 256;
         curvesTool.setup(amount);
         curvesTool.load("curves_"+ofToString(myID)+".yml"); //needed because it fills polyline
@@ -103,12 +108,14 @@ public:
     }
     
     void update(){
-//        checkGui();
+        //        checkGui();
         
-                
-//        ofLog()<<"curveTypeNames[curveTypeIndex] "<<curveTypeNames[curveTypeIndex];
+        
+        //        ofLog()<<"curveTypeNames[curveTypeIndex] "<<curveTypeNames[curveTypeIndex];
         if(makeActive == true){
             makeActive = false;
+            justBegan = true;
+            justEnded = false;
             bActive = true;
             lerpTimer.setToValue(0);
             lerpTimer.lerpToValue(amount);
@@ -147,7 +154,7 @@ public:
                 curveValueNormalized =  pow(lerpPercent,expo_value);
                 curveValue = curveValueNormalized* amount;
             }
-//            ofLog()<<myID<<" curveValue "<<curveValue<<" lerpPercent "<<lerpPercent; //lerpTimer.getTargetValue();
+            //            ofLog()<<myID<<" curveValue "<<curveValue<<" lerpPercent "<<lerpPercent; //lerpTimer.getTargetValue();
             
             if(endPause > 0){
                 if(lerpPercent >= 0.97){
@@ -180,7 +187,7 @@ public:
         
         ofSetColor(255);
         
-
+        
         
         ofSetColor(255);
         if(curveTypeIndex == 0){
@@ -214,12 +221,12 @@ public:
             ofSetLineWidth(2);
             ofSetColor(255,255,0);
             ofDrawRectangle(-3,-3,amount+6,amount+6);
-             ofSetLineWidth(1);
+            ofSetLineWidth(1);
         }
         
         ofSetColor(255);
         int temp_y = 0;
-        ofDrawBitmapString("span "+ofToString(myID), 1, temp_y+=15);
+        ofDrawBitmapString("span "+ofToString(myID) + " "+spanLabel, 1, temp_y+=15);
         ofDrawBitmapString("% "+ofToString(lerpPercent), 1, temp_y+=15);
         //        ofDrawBitmapString("from "+ofToString(lerpTimer.getStartValue()) +"  to "+ ofToString(lerpTimer.getTargetValue()), 0, temp_y+=15);
         //        ofDrawBitmapString("lerp value "+ofToString(lerpValue), 0, temp_y+=15);
@@ -236,7 +243,7 @@ public:
     void checkGui(){
         
         curveTypeName = curveTypeNames[curveTypeIndex];
-
+        
         
         if(bResetCurve){
             bResetCurve = false;
@@ -247,13 +254,15 @@ public:
         }
         if(bSave){
             bSave = false;
-            curvesTool.save("curves_"+myName+"_"+ofToString(myID)+".yml");
-            ofLog()<<"curveTool save "<<"curves_"+myName+"_"+ofToString(myID);
+            string str = "curves_"+timelineName+"_"+spanLabel+"_"+ofToString(myID);
+            curvesTool.save(str+".yml");
+            ofLog()<<"curveTool save "<<str;
         }
         if(bLoad){
             bLoad = false;
-            curvesTool.load("curves_"+myName+"_"+ofToString(myID)+".yml");
-            ofLog()<<"curveTool load "<<"curves_"+myName+"_"+ofToString(myID);
+            string str = "curves_"+timelineName+"_"+spanLabel+"_"+ofToString(myID);
+            curvesTool.load(str+".yml");
+            ofLog()<<"curveTool load "<<str;
         }
         
         if(old_duration != duration){

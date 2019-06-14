@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<timepan_object>
+	<bShow>0</bShow>
+	<combineSpans>1</combineSpans>
+	<activeIndex>1</activeIndex>
+	<activeValueX>0.333333</activeValueX>
+	<activeValueY>0.996094</activeValueY>
+	<span_0_thingOne>
+		<bActive>0</bActive>
+		<curveType>0</curveType>
+		<typeName>curveTool</typeName>
+		<expo_value>1</expo_value>
+		<resetCurve>0</resetCurve>
+		<duration>3</duration>
+		<endPause>1</endPause>
+	</span_0_thingOne>
+	<span_1_thingTwo>
+		<bActive>0</bActive>
+		<curveType>0</curveType>
+		<typeName>curveTool</typeName>
+		<expo_value>1</expo_value>
+		<resetCurve>0</resetCurve>
+		<duration>2</duration>
+		<endPause>1</endPause>
+	</span_1_thingTwo>
+	<span_2_thingThree>
+		<bActive>0</bActive>
+		<curveType>0</curveType>
+		<typeName>curveTool</typeName>
+		<expo_value>1</expo_value>
+		<resetCurve>0</resetCurve>
+		<duration>2</duration>
+		<endPause>0</endPause>
+	</span_2_thingThree>
+</timepan_object>

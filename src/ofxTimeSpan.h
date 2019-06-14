@@ -1,5 +1,5 @@
 //
-//  timeLineHandler.h
+//  ofxTimeSpan.h
 //  timeLine
 //
 //  Created by Stephan Schulz on 2018-04-13.
@@ -22,40 +22,57 @@ public:
     ofParameter<bool> bShow;
     ofParameter<bool> bCombineSpans;
     
-//     ofParameter<float> pauseBeforeRepeatDuration;
-//    float pauseBeforeRepeatTimer;
+    //     ofParameter<float> pauseBeforeRepeatDuration;
+    //    float pauseBeforeRepeatTimer;
     
-//    vector<ofParameter<float>> pauseEndDuration;
-//    vector<float> pauseEndTimer;
+    //    vector<ofParameter<float>> pauseEndDuration;
+    //    vector<float> pauseEndTimer;
     
     vector<oneSpan> allSpans;
+    oneSpan * currentSpan;
+    
     //    vector<ofParameter<int>> spanOrder;
     
     bool bTrigger;
     bool bRunning;
+    bool justBegan;
     int spanAmount;
+    vector<string> spanLabels;
+    
     ofParameter<int> activeIndex;
     ofParameter<float> activeValueX;
     ofParameter<float> activeValueY;
     bool readyForNewTrigger;
     
-    void setup(string _name,int _spansAmount, int _x, int _y){
+    void setup(string _name,  vector<string> _labels){
+        spanLabels = _labels;
+        setup(_name, spanLabels.size());
+    }
+    
+    void setup(string _name,int _spansAmount){
         
         timeLineName = _name;
         spanAmount = _spansAmount;
-        allSpans.resize(_spansAmount);
+        allSpans.resize(spanAmount);
+        
+        //if no labels were passed in
+        if(spanLabels.size() != spanAmount){
+            spanLabels.resize(spanAmount);
+            fill(spanLabels.begin(),spanLabels.end(),"");
+        }
         //        spanOrder.resize(_spans);
         
         for(int i=0; i<allSpans.size(); i++){
-            allSpans[i].setup(i,_name);
+            allSpans[i].setup(i,_name, spanLabels[i]);
         }
-//        
-//        pauseEndDuration.resize(_spans);
-//        pauseEndTimer.resize(_spans);
+        //        
+        //        pauseEndDuration.resize(_spans);
+        //        pauseEndTimer.resize(_spans);
         
         gui_spans.setup();
         gui_spans.setName(timeLineName);
-        gui_spans.setPosition(_x,_y);
+        //        gui_spans.setPosition(_x,_y);
+        gui_spans.setHeaderBackgroundColor(ofColor(255,0,0));
         gui_spans.add(bShow.set("bShow", false));
         gui_spans.add(bCombineSpans.set("combineSpans", false));
         
@@ -63,7 +80,7 @@ public:
         gui_spans.add(activeValueX.set("activeValueX",0,0,1));
         gui_spans.add(activeValueY.set("activeValueY",0,0,1));
         
-//        gui_spans.add(pauseBeforeRepeatDuration.set("pauseRepeatDur",30,0,300));
+        //        gui_spans.add(pauseBeforeRepeatDuration.set("pauseRepeatDur",30,0,300));
         
         //        for(int i=0; i<spanOrder.size(); i++){
         //            gui_spans.add(spanOrder[i].set("span_"+ofToString(i),-1,-1,spanOrder.size()));
@@ -82,6 +99,7 @@ public:
         
         bTrigger = false;
         bRunning = false;
+        justBegan = false;
         readyForNewTrigger = false;
     }
     
@@ -93,19 +111,28 @@ public:
         
     }
     
+    void triggerIt(){
+        justBegan = true;
+        bTrigger = true;
+        readyForNewTrigger = false;
+    }
     void update(){
         
         for(int i=0; i<allSpans.size(); i++){
             allSpans[i].checkGui();
         }
         
+        //        if(activeIndex >= 0 && activeIndex< spanAmount){
+        //            currentSpan = allSpans[activeIndex];
+        //        }
         if(bTrigger == true){
             //no path was triggered 
             
             bTrigger = false;
             bRunning = true;
             activeIndex = 0;
-            allSpans[activeIndex].makeActive = true;
+            currentSpan = &allSpans[activeIndex];
+            currentSpan->makeActive = true;
             //              ofLog()<<timeLineName<<" allSpans[activeIndex].old_bActive "<<allSpans[activeIndex].old_bActive;
             ofLog()<<timeLineName<<" bTrigger "<<bTrigger<<" activeIndex "<<activeIndex;
         }
@@ -115,21 +142,21 @@ public:
             }
             
             if(bCombineSpans == false){
-                activeValueX = allSpans[activeIndex].lerpPercent;
-                activeValueY = allSpans[activeIndex].curveValueNormalized;
+                activeValueX = currentSpan->lerpPercent;
+                activeValueY = currentSpan->curveValueNormalized;
             }else{
                 
                 activeValueX = 1 / float(allSpans.size());
                 activeValueX *= activeIndex;
-                activeValueX += allSpans[activeIndex].lerpPercent / float(allSpans.size());
+                activeValueX += currentSpan->lerpPercent / float(allSpans.size());
                 
-                activeValueY = allSpans[activeIndex].curveValueNormalized;
-//                activeValueY = activeIndex/float(allSpans.size()) + allSpans[activeIndex].curveValueNormalized / float(allSpans.size());
+                activeValueY = currentSpan->curveValueNormalized;
+                //                activeValueY = activeIndex/float(allSpans.size()) + allSpans[activeIndex].curveValueNormalized / float(allSpans.size());
             }
             
             //             ofLog()<<timeLineName<<" activeValue "<<activeValue;
             
-            if(allSpans[activeIndex].bDone == true){
+            if(currentSpan->bDone == true){
                 activeIndex++;
                 if(activeIndex >= allSpans.size()){
                     bRunning = false;
@@ -137,33 +164,34 @@ public:
                     readyForNewTrigger = true;
                     ofLog()<<"readyForNewTrigger new path due to timer expiration";
                 }else{
-                    allSpans[activeIndex].makeActive = true;
+                    currentSpan = &allSpans[activeIndex];
+                    currentSpan->makeActive = true;
                 }
                 ofLog()<<timeLineName<<" allSpans[activeIndex].bDone == true ";
                 ofLog()<<timeLineName<<" bRunning "<<bRunning;
             }
             
-//            if(bRunning == false && activeIndex == allSpans.size()){
-//                pauseBeforeRepeatTimer = ofGetElapsedTimef();
-//            }
+            //            if(bRunning == false && activeIndex == allSpans.size()){
+            //                pauseBeforeRepeatTimer = ofGetElapsedTimef();
+            //            }
         }
         
-//        if(bRunning == false && activeIndex == allSpans.size() && ofGetElapsedTimef() - pauseBeforeRepeatTimer > pauseBeforeRepeatDuration){
-////            bTrigger = true;
-//            readyForNewTrigger = true;
-//            ofLog()<<"readyForNewTrigger new path due to timer expiration";
-//        }
-       
+        //        if(bRunning == false && activeIndex == allSpans.size() && ofGetElapsedTimef() - pauseBeforeRepeatTimer > pauseBeforeRepeatDuration){
+        ////            bTrigger = true;
+        //            readyForNewTrigger = true;
+        //            ofLog()<<"readyForNewTrigger new path due to timer expiration";
+        //        }
+        
     }
     
     void draw(){
         ofPushMatrix();
-//        ofTranslate(gui_spans.getPosition().x + gui_spans.getWidth()+3,gui_spans.getPosition().y);
-//        ofTranslate(gui_spans.getPosition().x,gui_spans.getPosition().y + gui_spans.getHeight()+3);
-         ofTranslate(gui_spans.getPosition().x + gui_spans.getWidth()+3,gui_spans.getPosition().y);
-
+        //        ofTranslate(gui_spans.getPosition().x + gui_spans.getWidth()+3,gui_spans.getPosition().y);
+        //        ofTranslate(gui_spans.getPosition().x,gui_spans.getPosition().y + gui_spans.getHeight()+3);
+        ofTranslate(gui_spans.getPosition().x + gui_spans.getWidth()+3,gui_spans.getPosition().y);
+        
         for(int i=0; i<allSpans.size(); i++){
-//            allSpans[i].draw(0,i*258);
+            //            allSpans[i].draw(0,i*258);
             allSpans[i].draw(i*258,0);
         }
         ofPopMatrix();
